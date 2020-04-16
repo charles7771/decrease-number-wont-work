@@ -1,34 +1,38 @@
-//follow the comments in their numbered order below (1, 2)
-
-import React, { useContext , useState } from 'react'
-import { Context } from '../../Context/Context'
-import availableTimesJSON from './Form Imports/availableTimesList.json'
-import allBookings from '../root/imports/allBookings'
-import { currentTime } from '../../constants/CurrentTime'
-
 const TimeGrid = () => {
-  const { theme, timesUnavailable, removeFromTimesUnavailable, addToTimesUnavailable } = useContext(
-    Context,
-  )
-  const allBookedTimes = allBookings.map(element => element.time)
-  const availableTimes = availableTimesJSON.map(item => item.time)
 
-
+  const reducer = (state, action) => {
+    switch(action.type) {
+      case 'SET_COUNTER':
+        return {
+          ...state,
+          [`counter${action.id}`]: action.payload
+        }
+        default:
+          return state
+    }
+  }
+  let [{ counter }, dispatchReducer] = useReducer(reducer, {
+    counter: '',
+  })
   
-  const counts = {} //this will have something like 2230: 1, 2300: 5, 2330: 3
+  const counts = {}
   availableTimes.forEach(x => {
     counts[x] = (counts[x] || 0) + 1
   })
 
   const timeAlreadyDisplayed = []
-  const displayAvailableTimesJSON = availableTimesJSON.map((item, index) => {
-    
+  
+  const displayAvailableTimes = availableTimes.map((item, index) => {
+    dispatchReducer({
+      type: 'SET_COUNTER',
+      id: item.id,
+      payload: [`counts${item.time}`] //will return a number, e.g. 5
+    })
     if (index > 0 &&
-      item.time === availableTimesJSON[index - 1].time &&
-      item.time !== availableTimesJSON[index - 2].time) {
-      return ( 
-    //2. But this span won't update to reflect the decrese in number. How to solve this?
-        <span> {counts[`${item.time}`]} </span>
+      item.time === availableTimes[index - 1].time &&
+      item.time !== availableTimes[index - 2].time) {
+      return (
+        <span> {counter} </span>
       )
     }
     else if (item.time > currentTime - 10 && !timeAlreadyDisplayed[item.time]) {
@@ -38,34 +42,25 @@ const TimeGrid = () => {
           key={item.id}
           id={item.id}
           onClick={() => {
-              //1. this onClick should decrease the number at 'counts'. I believe it does...
-            counts[`${item.time}`] > 1 ? counts[`${item.time}`]-- :
-            allBookedTimes.includes(item.time) && item.day === 'today'
-              ? void 0
-              timesUnavailable.includes(item)
-                ? removeFromTimesUnavailable(item)
-                : addToTimesUnavailable(item)
-          }}
-          className={
-            timesUnavailable.find(element => item.id === element.id && item.time === element.time)
-              ? 'time-blocked'
-              : allBookedTimes.includes(item.time) && item.day === 'today'
-                ? 'time-booked'
-                : ''
-          }>
-          {`${item.time[0]}${item.time[1]}:${item.time[2]}${item.time[3]}`}
+            counter > 1 ? dispatchReducer({
+              type: 'SET_COUNTER',
+              id: item.id,
+              payload: counter - 1
+            }) :
+              isBooked ? doNothing()
+                : 
+                !isBlocked ? block() : unBlock()
+          }}>
+          {item.time}
         </li>
       )
-    } else { 
-      return null
-    }
+    } 
+    return null
   })
 
   return (
-    <div className={`TimeGrid-${theme}`}>
-      <ul>{displayAvailableTimesJSON}</ul>
-    </div>
+    <>
+      <ul>{displayAvailableTimes}</ul>
+    </>
   )
 }
-
-export default TimeGrid
