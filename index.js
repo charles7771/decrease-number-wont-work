@@ -15,6 +15,17 @@ const TimeGrid = () => {
     counter: '',
   })
   
+  const { theme, timesUnavailable, 
+        removeFromTimesUnavailable, 
+        addToTimesUnavailable } = useContext(Context)
+
+  
+  const allBookedTimes = allBookings.map(element => element.time)
+  //below, both have been mapped out of a JSON file
+  const extractedTimesOnly = availableTimesJSON.map(item => item.time)
+  const availableTimes = availableTimesJSON.map(item => item)
+  
+  
   const counts = {}
   availableTimes.forEach(x => {
     counts[x] = (counts[x] || 0) + 1
