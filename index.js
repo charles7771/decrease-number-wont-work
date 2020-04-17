@@ -47,9 +47,11 @@ const TimeGrid = () => {
               id: item.id,
               payload: counter - 1
             }) :
-              isBooked ? doNothing()
-                : 
-                !isBlocked ? block() : unBlock()
+              allBookedTimes.includes(item.time) && item.day === 'today'
+                ? void 0
+                timesUnavailable.includes(item)
+                  ? removeFromTimesUnavailable(item)
+                  : addToTimesUnavailable(item)
           }}>
           {item.time}
         </li>
