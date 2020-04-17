@@ -37,7 +37,7 @@ const TimeGrid = () => {
     dispatchReducer({
       type: 'SET_COUNTER',
       id: item.id,
-      payload: [`counts${item.time}`] //will return a number, e.g. 5
+      payload: counts[`${item.time}`] //doesn't seem to be working
     })
     if (index > 0 &&
       item.time === availableTimes[index - 1].time &&
